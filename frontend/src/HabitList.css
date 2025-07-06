@@ -1,0 +1,127 @@
+/*
+ * HabitList.css for Design Option 2: Soft & User-Friendly
+ *
+ * Color Palette:
+ * Primary: #4A69BD (Medium Blue)
+ * Accent: #78CAD2 (Teal)
+ * Backgrounds: #F5F7FA (Very Light Gray)
+ * Card Background: #FFFFFF (Pure White)
+ * Text: #5E6A7D (Subtle Dark Gray)
+ */
+
+.habit-list-section h1 {
+  color: #4A69BD;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.8em;
+  margin-top: 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ECEFF1; /* Subtle separator */
+  padding-bottom: 10px;
+  font-weight: 600;
+}
+
+.habit-list-ul {
+  background-color: #F8F8F8; /* Slightly off-white for list background */
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #E0E0E0;
+  list-style-type: none; /* Remove default bullet points */
+  padding-left: 0; /* Reset padding from list-style */
+}
+
+.habit-list-item {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+  align-items: center;
+  justify-content: space-between; /* Pushes reminder to the right */
+  color: #5E6A7D;
+  margin-bottom: 18px; /* Increased margin-bottom */
+  padding: 10px 0;
+  border-bottom: 1px dashed #E0E0E0; /* Dashed separator */
+  transition: background-color 0.2s ease; /* Smooth transition for hover */
+}
+
+.habit-list-item:last-child {
+  border-bottom: none; /* No border for the last item */
+  margin-bottom: 0;
+}
+
+.habit-list-item:hover {
+  background-color: #F0F0F0; /* Subtle background on hover */
+}
+
+.habit-list-item input[type="checkbox"] {
+  margin-right: 10px;
+  transform: scale(1.3); /* Larger checkbox */
+  accent-color: #4A69BD; /* Primary blue checkbox */
+  cursor: pointer;
+}
+
+.habit-text {
+  flex-grow: 1; /* Allows text to take up available space */
+  font-size: 1.05em;
+  font-weight: 500;
+}
+
+.habit-reminder-group {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between "Set Reminder" text and input */
+  margin-left: 20px; /* Space from the habit text */
+}
+
+.habit-reminder-group label {
+  font-size: 0.9em;
+  color: #5E6A7D;
+  white-space: nowrap; /* Prevent "Set Reminder:" from wrapping */
+}
+
+.habit-reminder-group input[type="time"] {
+  padding: 8px 10px;
+  border: 1px solid #DDE1E6;
+  border-radius: 5px;
+  font-size: 0.9em;
+  box-sizing: border-box;
+  width: auto; /* Allow input to size naturally or limit with max-width */
+  min-width: 100px;
+}
+.habit-reminder-group input[type="time"]:focus {
+  outline: none;
+  border-color: #4A69BD;
+  box-shadow: 0 0 0 2px rgba(74, 105, 189, 0.1);
+}
+
+/* Mobile adjustments for habit list */
+@media (max-width: 767px) {
+  .habit-list-section h1 {
+    font-size: 1.5em;
+    text-align: center;
+  }
+  .habit-list-ul {
+    padding: 15px;
+    border-radius: 8px;
+  }
+  .habit-list-item {
+    flex-direction: column; /* Stack elements vertically */
+    align-items: flex-start; /* Align text to the left */
+    gap: 8px; /* Space between stacked elements */
+    padding: 10px 0; /* Adjust padding for mobile */
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #E0E0E0; /* Keep dashed border on mobile */
+  }
+  .habit-list-item:last-child {
+    border-bottom: none;
+  }
+  .habit-list-item input[type="checkbox"] {
+    margin-bottom: 5px; /* Space below checkbox */
+    margin-right: 0; /* Remove right margin */
+  }
+  .habit-reminder-group {
+    width: 100%; /* Full width for reminder group */
+    margin-left: 0; /* Remove left margin */
+    justify-content: flex-start; /* Align reminder elements to the left */
+  }
+  .habit-reminder-group input[type="time"] {
+    width: 100%; /* Make time input full width */
+  }
+}

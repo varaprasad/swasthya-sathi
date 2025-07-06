@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import HabitList from './HabitList';
+import './App.css'; // Import your CSS file
 
 function App() {
   const [language, setLanguage] = useState('en');
   const [waterQuantity, setWaterQuantity] = useState('');
   const [waterLogMessage, setWaterLogMessage] = useState('');
-  const [todaysWaterIntake, setTodaysWaterIntake] = useState(0); // New state for total intake
-  const [sleepStartTime, setSleepStartTime] = useState(''); // New state for sleep start time
-  const [sleepEndTime, setSleepEndTime] = useState('');     // New state for sleep end time
-  const [sleepLogMessage, setSleepLogMessage] = useState(''); // New state for sleep log message
-  const [activityType, setActivityType] = useState('');       // New state for activity type
-  const [activityDuration, setActivityDuration] = useState(''); // New state for activity duration
-  const [activityLogMessage, setActivityLogMessage] = useState(''); // New state for activity log message
-  const [medicationName, setMedicationName] = useState('');     // New state for medication name
-  const [medicationDosage, setMedicationDosage] = useState(''); // New state for medication dosage
-  const [medicationTime, setMedicationTime] = useState('');     // New state for medication time
-  const [medicationReminderTime, setMedicationReminderTime] = useState(''); // New state for medication reminder time
-  const [medicationLogMessage, setMedicationLogMessage] = useState(''); // New state for medication log message
-  const [waterReminderTime, setWaterReminderTime] = useState(''); // New state for water reminder time
-  const [habitReminderTimes, setHabitReminderTimes] = useState({}); // State to store reminder times for each habit
+  const [todaysWaterIntake, setTodaysWaterIntake] = useState(0);
+  const [sleepStartTime, setSleepStartTime] = useState('');
+  const [sleepEndTime, setSleepEndTime] = useState('');
+  const [sleepLogMessage, setSleepLogMessage] = useState('');
+  const [activityType, setActivityType] = useState('');
+  const [activityDuration, setActivityDuration] = useState('');
+  const [activityLogMessage, setActivityLogMessage] = useState('');
+  const [medicationName, setMedicationName] = useState('');
+  const [medicationDosage, setMedicationDosage] = useState('');
+  const [medicationTime, setMedicationTime] = useState('');
+  const [medicationReminderTime, setMedicationReminderTime] = useState('');
+  const [medicationLogMessage, setMedicationLogMessage] = useState('');
+  const [waterReminderTime, setWaterReminderTime] = useState('');
+  const [habitReminderTimes, setHabitReminderTimes] = useState({});
   const backendUrl = 'http://localhost:5000';
 
   const fetchTodaysWaterIntake = async () => {
@@ -38,7 +39,7 @@ function App() {
   useEffect(() => {
     fetchTodaysWaterIntake();
     // You might want to fetch this data periodically or when a new log is added
-  }, [backendUrl]); // Fetch again if backendUrl changes
+  }, [backendUrl]);
 
   useEffect(() => {
     if (Notification.permission === 'granted') {
@@ -50,23 +51,23 @@ function App() {
     console.log('Habit Reminder useEffect triggered!');
     if (habitReminderTimes && Object.keys(habitReminderTimes).length > 0) {
       Notification.requestPermission().then(permission => {
-        console.log('Notification permission in Habit Reminder useEffect:', permission); // Added log
+        console.log('Notification permission in Habit Reminder useEffect:', permission);
         if (permission === 'granted') {
-          console.log('Habit Reminder useEffect: Permission granted. Fetching habits...'); // Added log
+          console.log('Habit Reminder useEffect: Permission granted. Fetching habits...');
           // Fetch habits to get the names based on IDs
           const fetchHabits = async () => {
             try {
-              console.log('Habit Reminder useEffect: Inside fetchHabits'); // Added log
+              console.log('Habit Reminder useEffect: Inside fetchHabits');
               const response = await fetch(`${backendUrl}/api/habits`);
               if (response.ok) {
                 const habitsData = await response.json();
-                console.log('Habit Reminder useEffect: Habits data received:', habitsData); // Added log
+                console.log('Habit Reminder useEffect: Habits data received:', habitsData);
                 for (const habitId in habitReminderTimes) {
-                  console.log('Habit Reminder useEffect: habitId (type):', habitId, typeof habitId); // ADD THIS LINE
+                  console.log('Habit Reminder useEffect: habitId (type):', habitId, typeof habitId);
                   const reminderTime = habitReminderTimes[habitId];
                   if (reminderTime) {
                     const habit = habitsData.find(h => {
-                      console.log('Habit Reminder useEffect: habit.id (type):', h.id, typeof h.id); // ADD THIS LINE
+                      console.log('Habit Reminder useEffect: habit.id (type):', h.id, typeof h.id);
                       return h.id === habitId; // Compare as strings directly
                     });
                     console.log('Habit Reminder useEffect: Found habit:', habit);
@@ -90,7 +91,7 @@ function App() {
                         console.log('Habit Reminder useEffect: Delay adjusted for next day:', delay);
                       }
 
-                      console.log('Habit Reminder useEffect: Scheduling notification with delay:', delay); // Added log
+                      console.log('Habit Reminder useEffect: Scheduling notification with delay:', delay);
                       setTimeout(() => {
                         new Notification('Habit Reminder', {
                           body: `Time to do your habit: ${habit.name_en}`, // Assuming English for now
@@ -101,7 +102,7 @@ function App() {
                   }
                 }
               } else {
-                console.error('Habit Reminder useEffect: Failed to fetch habits.'); // Added log
+                console.error('Habit Reminder useEffect: Failed to fetch habits.');
               }
             } catch (error) {
               console.error("Habit Reminder useEffect: Error fetching habits:", error);
@@ -122,7 +123,7 @@ function App() {
   };
 
   const handleLogWater = async () => {
-    console.log('Water Reminder Time:', waterReminderTime); // Optional: Add this line
+    console.log('Water Reminder Time:', waterReminderTime);
     if (!waterQuantity) {
       setWaterLogMessage('Please enter the quantity of water.');
       return;
@@ -236,7 +237,7 @@ function App() {
   };
 
   const handleLogMedication = async () => {
-    console.log('Medication Reminder Time:', medicationReminderTime); // Optional line
+    console.log('Medication Reminder Time:', medicationReminderTime);
     if (!medicationName || !medicationDosage || !medicationTime) {
       setMedicationLogMessage('Please enter medication name, dosage, and time.');
       return;
@@ -273,129 +274,151 @@ function App() {
       ...prevTimes,
       [habitId]: reminderTime,
     }));
-    console.log(`Reminder set for habit ${habitId} at:`, reminderTime); // Optional log
+    console.log(`Reminder set for habit ${habitId} at:`, reminderTime);
   };
 
   return (
-    <div>
-      <h1>SwasthyaSathi</h1>
-      <button onClick={handleLanguageToggle}>
-        Switch to {language === 'en' ? 'తెలుగు' : 'English'}
-      </button>
-      <HabitList language={language} onReminderChange={handleHabitReminderChange} />
+    <div className="app-container">
+      <div className="app-header">
+        <h1 className="app-title">SwasthyaSathi</h1>
+        <button onClick={handleLanguageToggle} className="language-toggle-button">
+          Switch to {language === 'en' ? 'తెలుగు' : 'English'}
+        </button>
+      </div>
+
+      <div className="section-card">
+        <HabitList language={language} onReminderChange={handleHabitReminderChange} />
+      </div>
 
       {/* Water Intake Tracking Section */}
-      <h2>Track Water Intake</h2>
-      <div>
-        <input
-          type="number"
-          placeholder="Enter quantity (ml)"
-          value={waterQuantity}
-          onChange={handleWaterInputChange}
-        />
-        <button onClick={handleLogWater}>Log Water</button>
-        {waterLogMessage && <p>{waterLogMessage}</p>}
-      </div>
-      <div>
-        <label htmlFor="waterReminder">Set Reminder:</label>
-        <input
-          type="time"
-          id="waterReminder"
-          onChange={(e) => setWaterReminderTime(e.target.value)}
-          value={waterReminderTime}
-        />
+      <div className="section-card">
+        <h2>Track Water Intake</h2>
+        <div className="form-group horizontal">
+          <label htmlFor="waterQuantity">Enter quantity (ml):</label>
+          <input
+            type="number"
+            id="waterQuantity"
+            placeholder="e.g., 500"
+            value={waterQuantity}
+            onChange={handleWaterInputChange}
+          />
+        </div>
+        <button onClick={handleLogWater} className="primary-button">Log Water</button>
+        {waterLogMessage && <p className="log-message">{waterLogMessage}</p>}
+
+        <div className="form-group horizontal" style={{ marginTop: '20px' }}>
+          <label htmlFor="waterReminder">Set Reminder:</label>
+          <input
+            type="time"
+            id="waterReminder"
+            onChange={(e) => setWaterReminderTime(e.target.value)}
+            value={waterReminderTime}
+          />
+        </div>
       </div>
 
       {/* Display Today's Water Intake */}
-      <h2>Today's Total Water Intake</h2>
-      <p>{todaysWaterIntake} ml</p>
+      <div className="section-card">
+        <h2>Today's Total Water Intake</h2>
+        <p style={{ fontSize: '1.5em', fontWeight: 'bold', color: '#3498DB' }}>{todaysWaterIntake} ml</p>
+      </div>
 
       {/* Sleep Duration Tracking Section */}
-      <h2>Track Sleep Duration</h2>
-      <div>
-        <label htmlFor="sleepStart">Sleep Start Time:</label>
-        <input
-          type="datetime-local"
-          id="sleepStart"
-          onChange={(e) => setSleepStartTime(e.target.value)}
-          value={sleepStartTime}
-        />
+      <div className="section-card">
+        <h2>Track Sleep Duration</h2>
+        <div className="form-group horizontal">
+          <label htmlFor="sleepStart">Sleep Start Time:</label>
+          <input
+            type="datetime-local"
+            id="sleepStart"
+            onChange={(e) => setSleepStartTime(e.target.value)}
+            value={sleepStartTime}
+          />
+        </div>
+        <div className="form-group horizontal">
+          <label htmlFor="sleepEnd">Sleep End Time:</label>
+          <input
+            type="datetime-local"
+            id="sleepEnd"
+            onChange={(e) => setSleepEndTime(e.target.value)}
+            value={sleepEndTime}
+          />
+        </div>
+        <button onClick={handleLogSleep} className="primary-button">Log Sleep</button>
+        {sleepLogMessage && <p className="log-message">{sleepLogMessage}</p>}
       </div>
-      <div>
-        <label htmlFor="sleepEnd">Sleep End Time:</label>
-        <input
-          type="datetime-local"
-          id="sleepEnd"
-          onChange={(e) => setSleepEndTime(e.target.value)}
-          value={sleepEndTime}
-        />
-      </div>
-      <button onClick={handleLogSleep}>Log Sleep</button>
-      {sleepLogMessage && <p>{sleepLogMessage}</p>}
 
       {/* Physical Activity Tracking Section */}
-      <h2>Track Physical Activity</h2>
-      <div>
-        <label htmlFor="activityType">Activity Type:</label>
-        <input
-          type="text"
-          id="activityType"
-          onChange={(e) => setActivityType(e.target.value)}
-          value={activityType}
-        />
+      <div className="section-card">
+        <h2>Track Physical Activity</h2>
+        <div className="form-group horizontal">
+          <label htmlFor="activityType">Activity Type:</label>
+          <input
+            type="text"
+            id="activityType"
+            placeholder="e.g., Running, Yoga"
+            onChange={(e) => setActivityType(e.target.value)}
+            value={activityType}
+          />
+        </div>
+        <div className="form-group horizontal">
+          <label htmlFor="activityDuration">Duration (in minutes):</label>
+          <input
+            type="number"
+            id="activityDuration"
+            placeholder="e.g., 30"
+            onChange={(e) => setActivityDuration(e.target.value)}
+            value={activityDuration}
+          />
+        </div>
+        <button onClick={handleLogActivity} className="primary-button">Log Activity</button>
+        {activityLogMessage && <p className="log-message">{activityLogMessage}</p>}
       </div>
-      <div>
-        <label htmlFor="activityDuration">Duration (in minutes):</label>
-        <input
-          type="number"
-          id="activityDuration"
-          onChange={(e) => setActivityDuration(e.target.value)}
-          value={activityDuration}
-        />
-      </div>
-      <button onClick={handleLogActivity}>Log Activity</button>
-      {activityLogMessage && <p>{activityLogMessage}</p>}
 
       {/* Medication Intake Tracking Section */}
-      <h2>Track Medication Intake</h2>
-      <div>
-        <label htmlFor="medicationName">Medication Name:</label>
-        <input
-          type="text"
-          id="medicationName"
-          onChange={(e) => setMedicationName(e.target.value)}
-          value={medicationName}
-        />
+      <div className="section-card">
+        <h2>Track Medication Intake</h2>
+        <div className="form-group horizontal">
+          <label htmlFor="medicationName">Medication Name:</label>
+          <input
+            type="text"
+            id="medicationName"
+            placeholder="e.g., Paracetamol"
+            onChange={(e) => setMedicationName(e.target.value)}
+            value={medicationName}
+          />
+        </div>
+        <div className="form-group horizontal">
+          <label htmlFor="medicationDosage">Dosage:</label>
+          <input
+            type="text"
+            id="medicationDosage"
+            placeholder="e.g., 500mg, 1 tablet"
+            onChange={(e) => setMedicationDosage(e.target.value)}
+            value={medicationDosage}
+          />
+        </div>
+        <div className="form-group horizontal">
+          <label htmlFor="medicationTime">Time Taken:</label>
+          <input
+            type="datetime-local"
+            id="medicationTime"
+            onChange={(e) => setMedicationTime(e.target.value)}
+            value={medicationTime}
+          />
+        </div>
+        <div className="form-group horizontal">
+          <label htmlFor="medicationReminder">Set Reminder:</label>
+          <input
+            type="time"
+            id="medicationReminder"
+            onChange={(e) => setMedicationReminderTime(e.target.value)}
+            value={medicationReminderTime}
+          />
+        </div>
+        <button onClick={handleLogMedication} className="primary-button">Log Medication</button>
+        {medicationLogMessage && <p className="log-message">{medicationLogMessage}</p>}
       </div>
-      <div>
-        <label htmlFor="medicationDosage">Dosage:</label>
-        <input
-          type="text"
-          id="medicationDosage"
-          onChange={(e) => setMedicationDosage(e.target.value)}
-          value={medicationDosage}
-        />
-      </div>
-      <div>
-        <label htmlFor="medicationTime">Time Taken:</label>
-        <input
-          type="datetime-local"
-          id="medicationTime"
-          onChange={(e) => setMedicationTime(e.target.value)}
-          value={medicationTime}
-        />
-      </div>
-      <div>
-        <label htmlFor="medicationReminder">Set Reminder:</label>
-        <input
-          type="time"
-          id="medicationReminder"
-          onChange={(e) => setMedicationReminderTime(e.target.value)}
-          value={medicationReminderTime}
-        />
-      </div>
-      <button onClick={handleLogMedication}>Log Medication</button>
-      {medicationLogMessage && <p>{medicationLogMessage}</p>}
     </div>
   );
 }

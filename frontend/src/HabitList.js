@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './HabitList.css'; // Import your HabitList CSS file
 
 function HabitList({ language, onReminderChange }) {
   const [habits, setHabits] = useState([]);
@@ -20,7 +21,7 @@ function HabitList({ language, onReminderChange }) {
 
         // Fetch completion status for today
         const habitIds = data.map(habit => habit.id);
-        const today = new Date().toISOString().slice(0, 10); // Get today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().slice(0, 10); // Get today's date in('-');-MM-DD format
 
         const statusResponse = await fetch(`${backendUrl}/api/habits/status`, {
           method: 'POST',
@@ -78,18 +79,19 @@ function HabitList({ language, onReminderChange }) {
   };
 
   return (
-    <div>
+    <div className="habit-list-section">
       <h1>Habit List</h1>
-      <ul>
+      <ul className="habit-list-ul">
         {habits.map(habit => (
-          <li key={habit.id}>
+          <li key={habit.id} className="habit-list-item">
             <input
               type="checkbox"
+              style={{ accentColor: '#3498DB' }}
               checked={completedHabits[habit.id] || false}
               onChange={(event) => handleHabitCompletionToggle(habit.id, event.target.checked)}
             />
-            {language === 'te' ? habit.name_te : habit.name_en}
-            <div style={{ display: 'inline-block', marginLeft: '10px' }}>
+            <span className="habit-text">{language === 'te' ? habit.name_te : habit.name_en}</span>
+            <div className="habit-reminder-group">
               <label htmlFor={`habitReminder-${habit.id}`}>Set Reminder:</label>
               <input
                 type="time"

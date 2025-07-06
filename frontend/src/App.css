@@ -1,38 +1,246 @@
-.App {
-  text-align: center;
+/*
+ * App.css for Design Option 2: Soft & User-Friendly
+ *
+ * Color Palette:
+ * Primary: #4A69BD (Medium Blue)
+ * Accent: #78CAD2 (Teal)
+ * Backgrounds: #F5F7FA (Very Light Gray)
+ * Card Background: #FFFFFF (Pure White)
+ * Text: #5E6A7D (Subtle Dark Gray)
+ * Success/Info: #5cb85c (Standard Green)
+ * Warning/Error: #d9534f (Standard Red)
+ *
+ * Fonts:
+ * Headings: 'Montserrat', sans-serif
+ * Body Text: 'Lato', sans-serif
+ */
+
+/* General Body Styles */
+body {
+  font-family: 'Lato', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #F5F7FA; /* Very Light Gray background for the whole page */
+  color: #5E6A7D;
+  line-height: 1.7; /* Increased line height for better readability */
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Overall App Container */
+.app-container {
+  max-width: 900px;
+  margin: 25px auto;
+  padding: 25px;
+  background-color: #F5F7FA; /* Match body background, cards will stand out */
+  border-radius: 0; /* No border-radius on container, cards handle it */
+  box-shadow: none; /* No shadow on container */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Header Section */
+.app-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ECEFF1; /* Subtle separator */
 }
 
-.App-link {
-  color: #61dafb;
+.app-title {
+  color: #4A69BD;
+  font-size: 2.8em;
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em; /* Subtle letter spacing */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.language-toggle-button {
+  background-color: #78CAD2; /* Teal accent */
+  color: #FFFFFF;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px; /* Softer rounded corners */
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.language-toggle-button:hover {
+  background-color: #57B6C0; /* Darker teal on hover */
+  transform: translateY(-1px); /* Slight lift effect */
+}
+.language-toggle-button:active {
+  transform: translateY(0); /* Reset on click */
+}
+
+/* Section Cards */
+.section-card {
+  background-color: #FFFFFF; /* White card background */
+  padding: 30px; /* Increased padding for more space */
+  border-radius: 12px; /* Softer rounded corners */
+  margin-bottom: 30px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08); /* More pronounced shadow */
+  border: 1px solid #EEE; /* Very light border */
+}
+
+.section-card h2 {
+  color: #4A69BD;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.8em;
+  margin-top: 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ECEFF1; /* Subtle separator */
+  padding-bottom: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em; /* Subtle letter spacing */
+}
+
+/* Form Groups */
+.form-group {
+  display: flex;
+  flex-direction: column; /* Stack label and input by default */
+  margin-bottom: 18px;
+}
+.form-group label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #5E6A7D;
+  font-size: 0.95em;
+  display: block; /* Ensure label is on its own line */
+}
+
+/* Horizontal form group for larger screens */
+@media (min-width: 768px) {
+  .form-group.horizontal {
+    flex-direction: row;
+    align-items: center;
   }
-  to {
-    transform: rotate(360deg);
+  .form-group.horizontal label {
+    width: 180px; /* Fixed width for labels */
+    margin-right: 15px;
+    text-align: right; /* Align labels to the right */
+    margin-bottom: 0;
+  }
+}
+
+/* Input Field Styles */
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+input[type="time"] {
+  width: 100%; /* Full width within their container */
+  padding: 12px;
+  border: 1px solid #DDE1E6; /* Soft gray border */
+  border-radius: 8px; /* More rounded */
+  font-size: 1.05em;
+  color: #5E6A7D;
+  box-sizing: border-box; /* Include padding/border in width */
+  transition: all 0.3s ease; /* Smooth transition for focus */
+}
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="datetime-local"]:focus,
+input[type="time"]:focus {
+  outline: none;
+  border-color: #4A69BD; /* Primary blue on focus */
+  box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.15); /* Subtle blue glow */
+}
+
+/* Buttons */
+.primary-button {
+  background-color: #4A69BD; /* Medium Blue */
+  color: #FFFFFF;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: 700; /* Bolder text */
+  letter-spacing: 0.5px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  min-width: 140px;
+  text-align: center;
+  display: inline-block;
+  margin-top: 10px; /* Space above button */
+}
+.primary-button:hover {
+  background-color: #3856A3; /* Darker blue on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.primary-button:active {
+  transform: scale(0.98); /* Slight shrink effect */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Messages */
+.log-message {
+  margin-top: 15px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  background-color: #D4EDDA; /* Light green for success */
+  color: #155724; /* Dark green text */
+  border: 1px solid #C3E6CB;
+}
+.log-message.error {
+  background-color: #F8D7DA; /* Light red for error */
+  color: #721C24; /* Dark red text */
+  border: 1px solid #F5C6CB;
+}
+
+/* Today's Water Intake Display */
+.water-intake-display p {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #4A69BD; /* Primary blue for emphasis */
+  margin: 10px 0;
+}
+
+
+/* Mobile Responsiveness */
+@media (max-width: 767px) {
+  .app-container {
+    margin: 10px auto;
+    padding: 15px;
+  }
+  .app-header {
+    flex-direction: column;
+    align-items: center; /* Center header elements on mobile */
+    text-align: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .app-title {
+    font-size: 2em;
+  }
+  .language-toggle-button {
+    width: 100%;
+    padding: 10px;
+  }
+  .section-card {
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+  }
+  .section-card h2 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  .primary-button {
+    width: 100%;
+    min-width: auto;
+    padding: 10px 20px;
+    font-size: 1em;
+  }
+  input[type="text"],
+  input[type="number"],
+  input[type="datetime-local"],
+  input[type="time"] {
+    padding: 10px 12px;
+    font-size: 0.9em;
+  }
+  .form-group label {
+    text-align: left; /* Ensure labels are left-aligned on mobile */
   }
 }
