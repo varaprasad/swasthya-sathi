@@ -1,0 +1,30 @@
+flows:
+  log_water_intake:
+    description: Log any message where a user says they drank water or wants to record water intake.
+      This includes phrases like 'I drank 2 liters of water', 'log my water intake',
+      'I had a glass of water', 'add water intake', 'I had two cups of water', or any
+      other way a user might mention drinking water.
+    nlu_trigger:
+      - intent: log_water
+    steps:
+      - collect: amount
+        description: the amount of water consumed
+        utter: utter_ask_water_amount
+      - action: action_log_water
+        next: END
+
+  greet_user:
+    description: Greet the user when they say hello
+    nlu_trigger:
+      - intent: greet
+    steps:
+      - action: utter_greet
+        next: END
+
+  say_goodbye:
+    description: Say goodbye to the user
+    nlu_trigger:
+      - intent: goodbye
+    steps:
+      - action: utter_goodbye
+        next: END

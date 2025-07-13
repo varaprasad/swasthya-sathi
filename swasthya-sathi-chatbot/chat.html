@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rasa Water Logging Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .chat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+        
+        .message.user .message-content {
+            background: #007bff;
+            color: white;
+        }
+        
+        .message.bot .message-content {
+            background: #e9ecef;
+            color: #333;
+        }
+        
+        .message-sender {
+            font-size: 12px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .input-container {
+            display: flex;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .send-button {
+            margin-left: 10px;
+            padding: 12px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .send-button:hover {
+            background: #0056b3;
+        }
+        
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .error {
+            color: #dc3545;
+        }
+        
+        .typing {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>💧 Water Logging Assistant</h2>
+            <p>Track your daily water intake</p>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div>
+                    <div class="message-sender">Assistant</div>
+                    <div class="message-content">
+                        Hello! I'm here to help you log your water intake. Try saying "log water" or "I drank 2 liters of water".
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status" id="status">Ready to chat</div>
+        
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="messageInput" 
+                class="message-input" 
+                placeholder="Type your message here..."
+                maxlength="500"
+            >
+            <button id="sendButton" class="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        class RasaChatWidget {
+            constructor() {
+                this.messagesContainer = document.getElementById('chatMessages');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.status = document.getElementById('status');
+                this.rasaUrl = 'http://localhost:5005/webhooks/rest/webhook';
+                this.userId = 'user_' + Math.random().toString(36).substr(2, 9);
+                
+                this.initializeEventListeners();
+            }
+            
+            initializeEventListeners() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                
+                // Auto-focus input
+                this.messageInput.focus();
+            }
+            
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+                
+                // Disable input while processing
+                this.setInputState(false);
+                
+                // Add user message to chat
+                this.addMessage(message, 'user');
+                
+                // Clear input
+                this.messageInput.value = '';
+                
+                try {
+                    this.setStatus('Sending message...', false);
+                    
+                    const response = await fetch(this.rasaUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            sender: this.userId,
+                            message: message
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    this.setStatus('Ready to chat', false);
+                    
+                    if (data && data.length > 0) {
+                        // Add bot responses
+                        data.forEach((botMessage, index) => {
+                            setTimeout(() => {
+                                if (botMessage.text) {
+                                    this.addMessage(botMessage.text, 'bot');
+                                } else if (botMessage.image) {
+                                    this.addImageMessage(botMessage.image, 'bot');
+                                }
+                            }, index * 500); // Stagger multiple responses
+                        });
+                    } else {
+                        this.addMessage("I didn't understand that. Try saying 'log water' or 'I drank 2 cups of water'.", 'bot');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    this.setStatus(`Error: ${error.message}`, true);
+                    this.addMessage('Sorry, I had trouble connecting to the server. Please make sure Rasa is running on localhost:5005.', 'bot');
+                } finally {
+                    this.setInputState(true);
+                    this.messageInput.focus();
+                }
+            }
+            
+            addMessage(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                messageDiv.innerHTML = `
+                    <div>
+                        <div class="message-sender">${sender === 'user' ? 'You' : 'Assistant'}</div>
+                        <div class="message-content">${this.escapeHtml(text)}</div>
+                    </div>
+                `;
+                
+                this.messagesContainer.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+            
+            addImageMessage(imageUrl, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                messageDiv.innerHTML = `
+                    <div>
+                        <div class="message-sender">${sender === 'user' ? 'You' : 'Assistant'}</div>
+                        <div class="message-content">
+                            <img src="${imageUrl}" alt="Image" style="max-width: 100%; border-radius: 8px;">
+                        </div>
+                    </div>
+                `;
+                
+                this.messagesContainer.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+            
+            setInputState(enabled) {
+                this.messageInput.disabled = !enabled;
+                this.sendButton.disabled = !enabled;
+            }
+            
+            setStatus(message, isError) {
+                this.status.textContent = message;
+                this.status.className = isError ? 'status error' : 'status';
+            }
+            
+            scrollToBottom() {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+        
+        // Initialize chat widget when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new RasaChatWidget();
+        });
+    </script>
+</body>
+</html>

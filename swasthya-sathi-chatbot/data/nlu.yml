@@ -1,0 +1,52 @@
+version: "3.1"
+
+nlu:
+  - intent: log_water
+    examples: |
+      - log water
+      - I drank [2 liters](amount) of water
+      - log my water intake
+      - I had [500ml](amount) of water
+      - add water intake
+      - I had [two cups](amount) of water
+      - record water consumption
+      - track my hydration
+      - [1000ml](amount)
+      - [2 cups](amount)
+      - [500 ml](amount)
+      - [1 liter](amount)
+      - I consumed [1.5 liters](amount)
+      - drank [3 glasses](amount) of water
+      - had [a bottle](amount) of water
+      - I drank [750ml](amount)
+      - consumed [4 cups](amount)
+      - I had [a glass](amount) of water
+      - logged [2.5 liters](amount)
+      - drank [16 oz](amount)
+      - I consumed [1 gallon](amount)
+      - had [half a liter](amount)
+      - drank water [300ml](amount)
+      - I had water [2 glasses](amount)
+
+  - intent: greet
+    examples: |
+      - hello
+      - hi
+      - hey
+      - good morning
+      - good afternoon
+      - good evening
+      - howdy
+      - what's up
+      - greetings
+
+  - intent: goodbye
+    examples: |
+      - bye
+      - goodbye
+      - see you later
+      - talk to you later
+      - farewell
+      - catch you later
+      - have a good day
+      - until next time

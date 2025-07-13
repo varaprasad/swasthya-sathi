@@ -1,0 +1,4 @@
+action_endpoint:
+  actions_module: "actions"
+
+rest:

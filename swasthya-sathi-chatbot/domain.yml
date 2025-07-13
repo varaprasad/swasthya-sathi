@@ -1,0 +1,36 @@
+version: "3.1"
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
+
+intents:
+  - log_water
+  - greet
+  - goodbye
+
+entities:
+  - amount
+
+responses:
+  utter_ask_water_amount:
+    - text: "How much water did you drink? (e.g., 2 liters, 500ml, 3 cups)"
+
+  utter_greet:
+    - text: "Hello! How can I help you today?"
+
+  utter_goodbye:
+    - text: "Goodbye! Have a great day!"
+
+slots:
+  amount:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: amount
+
+actions:
+  - action_log_water
+  - utter_greet
+  - utter_goodbye
+  - utter_ask_water_amount

@@ -1,0 +1,4 @@
+rasa-pro
+firebase-admin
+google-cloud-firestore
+python-dotenv
