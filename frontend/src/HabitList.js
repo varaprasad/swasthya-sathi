@@ -1,81 +1,69 @@
-import React, { useState, useEffect } from 'react';
-import './HabitList.css'; // Import your HabitList CSS file
+import React, { useState, useEffect, useCallback } from 'react';
+import './HabitList.css';
 
-function HabitList({ language, onReminderChange }) {
+function HabitList({ language, onReminderChange, onCompleteHabit }) {
   const [habits, setHabits] = useState([]);
   const [completedHabits, setCompletedHabits] = useState({});
-  const backendUrl = 'http://localhost:5000'; // Your Flask backend URL
+  const backendUrl = 'http://localhost:5000';
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const fetchHabitsData = useCallback(async () => {
+    try {
+      const response = await fetch(`${backendUrl}/api/habits`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setHabits(data);
+    } catch (error) {
+      console.error("Could not fetch habits:", error);
+    }
+  }, [backendUrl]);
+
+  const fetchCompletionStatus = useCallback(async () => {
+    const habitIds = habits.map(habit => habit.id);
+    const today = new Date().toISOString().slice(0, 10);
+
+    try {
+      const statusResponse = await fetch(`${backendUrl}/api/habits/status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ habit_ids: habitIds, date: today }),
+      });
+
+      if (statusResponse.ok) {
+        const statusData = await statusResponse.json();
+        setCompletedHabits(statusData);
+      } else {
+        console.error("Failed to fetch completion status:", statusResponse.status);
+      }
+    } catch (error) {
+      console.error("Failed to fetch completion status:", error);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [backendUrl, habits]);
 
   useEffect(() => {
-    console.log("HabitList useEffect is running!"); // Existing log
+    fetchHabitsData();
+  }, [fetchHabitsData]);
 
-    const fetchHabits = async () => {
-      try {
-        const response = await fetch(`${backendUrl}/api/habits`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setHabits(data);
-        console.log("Habits data:", data); // ADD THIS LINE
+  useEffect(() => {
+    if (habits.length > 0) {
+      fetchCompletionStatus();
+    }
+  }, [habits, fetchCompletionStatus]);
 
-        // Fetch completion status for today
-        const habitIds = data.map(habit => habit.id);
-        const today = new Date().toISOString().slice(0, 10); // Get today's date in('-');-MM-DD format
-
-        const statusResponse = await fetch(`${backendUrl}/api/habits/status`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ habit_ids: habitIds, date: today }),
-        });
-
-        if (statusResponse.ok) {
-          const statusData = await statusResponse.json();
-          setCompletedHabits(statusData);
-          console.log("Completion Status:", statusData);
-        } else {
-          console.error("Failed to fetch completion status:", statusResponse.status);
-        }
-
-      } catch (error) {
-        console.error("Could not fetch habits:", error);
-        // You might want to display an error message to the user here
-      }
-    };
-
-    fetchHabits();
-  }, [backendUrl]); // Re-fetch if backendUrl changes
-
-  const handleHabitCompletionToggle = (habitId, isChecked) => {
+  const handleHabitCompletionToggle = async (habitId, isChecked) => {
+    setIsSyncing(true);
     setCompletedHabits(prevCompleted => ({
       ...prevCompleted,
       [habitId]: isChecked,
     }));
-    console.log(`Habit ${habitId} is now ${isChecked ? 'completed' : 'not completed'}`);
-
-    fetch(`${backendUrl}/api/habits/complete`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ habit_id: habitId }),
-    })
-      .then(response => {
-        if (response.ok) {
-          console.log(`Habit ${habitId} completion recorded on backend`);
-        } else {
-          console.error(`Failed to record habit ${habitId} completion on backend`);
-        }
-        return response.json(); // Optionally log the json response
-      })
-      .then(data => {
-        console.log("Completion API Response:", data);
-      })
-      .catch(error => {
-        console.error("Error recording habit completion:", error);
-      });
+    await onCompleteHabit(habitId, isChecked);
+    fetchCompletionStatus();
   };
 
   return (

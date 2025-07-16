@@ -5,6 +5,8 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 from datetime import datetime
 from datetime import date as pydate
+import json
+from pywebpush import webpush, WebPushException
 
 app = Flask(__name__)
 # CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
@@ -15,6 +17,47 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 cred = credentials.Certificate('credentials/swasthyasathi-firebase-firebase-adminsdk-fbsvc-f4d90b5b72.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
+
+# You might want to store these as environment variables instead
+VAPID_PUBLIC_KEY = "BHYyXiAoFlAHQ2pAduneylMVM9X0qlQOsT8nBjA7R5TtySi-hDybms8V_XewxPhhUNskxd6lkgylysdU04PYwdw"
+VAPID_PRIVATE_KEY = "KEUfRUUFgWGPGlMrSaIlZa8m_RFxMs7sucQMUp6-GNA"
+VAPID_CLAIMS = {"sub": "mailto:prasadrajukv@gmail.com", "aud": "https://fcm.googleapis.com"} # Replace with your actual email
+
+@app.route('/api/send_notification', methods=['POST'])
+def send_push_notification():
+    user_id_to_notify = "test_user" # The same hardcoded user ID used during subscription
+    try:
+        push_subscriptions_ref = db.collection('PushSubscriptions')
+        doc = push_subscriptions_ref.document(user_id_to_notify).get()
+
+        if not doc.exists:
+            return jsonify({"error": "No push subscription found for this user."}), 404
+
+        subscription_data = doc.to_dict()
+
+        subscription_info = {
+            "endpoint": subscription_data.get('endpoint'),
+            "keys": {
+                "p256dh": subscription_data.get('keys', {}).get('p256dh'),
+                "auth": subscription_data.get('keys', {}).get('auth'),
+            },
+        }
+        message = json.dumps({"title": "Your Reminder!", "body": "Time for your medication."})
+
+        webpush(
+            subscription_info=subscription_info,
+            data=message,
+            vapid_private_key=VAPID_PRIVATE_KEY,
+            vapid_claims=VAPID_CLAIMS
+        )
+        return jsonify({"success": True}), 200
+
+    except WebPushException as exc:
+        print(f"I'm sorry, but the push service said no: {exc}")
+        return jsonify({"error": str(exc)}), 400
+    except Exception as e:
+        print(f"Error sending notification: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/habits', methods=['GET'])
 def get_habits():
@@ -44,22 +87,25 @@ def complete_habit():
         return response
     elif request.method == 'POST':
         habit_id = request.json.get('habit_id')
+        is_completed = request.json.get('is_completed')
         if not habit_id:
             return jsonify({"error": "Habit ID is required"}), 400
 
         today = pydate.today().isoformat()
-
         completion_collection = db.collection('HabitCompletions')
-        existing_completion = completion_collection.where('habit_id', '==', habit_id).where('completion_date', '==', today).get()
+        query = completion_collection.where('habit_id', '==', habit_id).where('completion_date', '==', today)
+        docs = query.get()
 
-        if existing_completion:
-            return jsonify({"message": f"Habit {habit_id} already completed today"}), 200
-        else:
-            try:
-                completion_collection.add({'habit_id': habit_id, 'completion_date': today})
-                return jsonify({"message": f"Habit {habit_id} marked as completed today"}), 201
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
+        try:
+            if docs:
+                doc_ref = completion_collection.document(docs[0].id)
+                doc_ref.update({'is_completed': is_completed})
+                return jsonify({"message": f"Habit {habit_id} completion status updated"}), 200
+            else:
+                completion_collection.add({'habit_id': habit_id, 'completion_date': today, 'is_completed': is_completed})
+                return jsonify({"message": f"Habit {habit_id} marked as {'completed' if is_completed else 'not completed'} today"}), 201
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
 @app.route('/api/habits/status', methods=['POST'])
 def get_habit_status():
@@ -74,7 +120,7 @@ def get_habit_status():
             completion_date = pydate.fromisoformat(date_str)
             date_to_check = completion_date.isoformat()
         except ValueError:
-            return jsonify({"error": "Invalid datetime format. Please use formats like<\ctrl3348>-MM-DDTHH:MM:SSZ, DD-Mon-YYYY HH:MM, or DD-MM-YYYY HH:MM"}), 400
+            return jsonify({"error": "Invalid datetime format. Please use formats like YYYY-MM-DD"}), 400
     else:
         today = pydate.today()
         date_to_check = today.isoformat()
@@ -84,7 +130,7 @@ def get_habit_status():
 
     try:
         for habit_id in habit_ids:
-            query = completion_collection.where('habit_id', '==', habit_id).where('completion_date', '==', date_to_check).limit(1)
+            query = completion_collection.where('habit_id', '==', habit_id).where('completion_date', '==', date_to_check).where('is_completed', '==', True).limit(1)
             docs = query.get()
             completions[habit_id] = not not docs # True if there is at least one doc, False otherwise
         return jsonify(completions), 200
@@ -218,6 +264,22 @@ def log_medication_intake():
         return jsonify({"message": "Medication logged successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-        
+
+@app.route('/api/subscribe', methods=['POST'])
+def subscribe():
+    subscription_data = request.get_json()
+    # For testing, use a hardcoded user ID
+    user_id = "test_user"
+    try:
+        # Assuming you have a Firestore collection named 'PushSubscriptions'
+        push_subscriptions_ref = db.collection('PushSubscriptions')
+        # Store the subscription data with the user ID as the document ID (or as a field)
+        push_subscriptions_ref.document(user_id).set(subscription_data)
+        print(f"Subscription stored for user: {user_id}")
+        return jsonify({"success": True}), 201
+    except Exception as e:
+        print(f"Error storing subscription: {e}")
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
